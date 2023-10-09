@@ -1,14 +1,20 @@
-#Makefile
+CC = gcc
+CFLAGS = -Wall -Wextra -Werror -I../libs/Reseau
+LDFLAGS = -L../libs/Reseau
+LIBS = -lreseau
+TARGET = sioux
+SRCS = $(TARGET).c
+OBJS = $(SRCS:.c=.o)
 
-CDFLAGS = -W -Wall -Wextra -g
-TARGET = main.c
+all: $(TARGET)
 
-all :
+$(TARGET): $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-.PHONY : clean
+.PHONY: clean
 
-clean :
-	rm -f *.o
-
-
+clean:
+	rm -f $(TARGET) $(OBJS)
