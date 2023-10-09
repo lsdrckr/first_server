@@ -2,3 +2,5 @@
 *.o
 #ignore all lib files
 *.a
+#ignore exec files
+sioux

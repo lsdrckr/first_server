@@ -1,4 +1,3 @@
-CC = gcc
 CFLAGS = -Wall -Wextra -Werror -I../libs/Reseau
 LDFLAGS = -L../libs/Reseau
 LIBS = -lreseau
