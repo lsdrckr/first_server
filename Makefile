@@ -7,14 +7,13 @@ export CDEBUG = -g -DDEBUG
 
 DIRS = Sioux libs
 
-all : 
 all:
-	cd Sioux/ && make
-	cd libs/ && make
+	@for dir in $(DIRS); do \
+        echo "Building in $$dir..."; \
+        $(MAKE) -C $$dir; \
+	done
 
 .PHONY : clean 
 
 clean:
-	rm -f *.o
-	cd Sioux/ && make
-	cd libs/ && make
+	# A faire
