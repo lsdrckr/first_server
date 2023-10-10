@@ -13,7 +13,14 @@ all:
         $(MAKE) -C $$dir; \
 	done
 
+
+start:
+	cd ./Sioux/ && ./sioux
+
 .PHONY : clean 
 
 clean:
-	# A faire
+	for dir in $(DIRS); do \
+		$(MAKE) -C $$dir -f Makefile $@; \
+	done
+
