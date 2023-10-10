@@ -7,6 +7,9 @@
 #define MAX_SERVICE_NAME 32
 #define DEFAULT_PORT 8080
 
+#define MAX_LIGNE 16
+#define BUFFERSIZE 512
+
 void analyzeArg(int argc, char* argv[], char service[]){
     
     int option;
@@ -20,21 +23,47 @@ void analyzeArg(int argc, char* argv[], char service[]){
                 strcpy(service,optarg);
                 break;
             default : 
-                perror("Option non reconnue");
+                perror("Arguments incorrects -p [port] --port [port]");
                 exit(EXIT_FAILURE);
         }
     }
 }
 
-int clientGestion(){
+int clientGestion(int sockFd){
+    
     printf("Un nouveau client !\n");
+    // Obtenir la strcuture de fichier
+    FILE *stream = fdopen(sockFd, "a+");
+    if(stream==NULL){
+        perror("clientGestion.fdopen");
+        exit(EXIT_FAILURE);
+    }
+    
+    // Obtenir le ficher html
+    FILE *html = fopen("../Web/index.html", "r");
+    if(html == NULL){
+        perror("Ouverture du fichier html");
+        exit(EXIT_FAILURE);
+    }
+    
+    //Envoyer l'entête
+    fprintf(stream, "200\n");
+    fprintf(stream, "Content-Type: text/html\n");
+    fprintf(stream, "Content-Length: 90\n");
+    
+    char ligne[MAX_LIGNE];
+    while(fgets(ligne,MAX_LIGNE,html)!=NULL)
+    fprintf(stream,"%s",ligne);
+    
+    // Terminer la connexion 
+    fclose(stream);
     return 0;
 }
 
 int main(int argc, char* argv[]){
 
     int sockFd;
-    char service[MAX_SERVICE_NAME] = "8080";
+    char service[MAX_SERVICE_NAME] = "80";
     
     analyzeArg(argc, argv, service);
     
