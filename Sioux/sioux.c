@@ -5,7 +5,6 @@
 #include <string.h>
 
 #define MAX_SERVICE_NAME 32
-#define DEFAULT_PORT 8080
 #define MAX_LINE 512
 
 void analyzeArg(int argc, char* argv[], char service[]){
@@ -38,7 +37,7 @@ int clientGestion(int sockFd){
     }
     
     // Obtenir le ficher html
-    FILE *html = fopen("../Web/index.html", "r");
+    FILE *html = fopen("../html/index.html", "r");
     if(html == NULL){
         perror("Ouverture du fichier html");
         exit(EXIT_FAILURE);
@@ -47,7 +46,7 @@ int clientGestion(int sockFd){
     //Envoyer l'entête
     fprintf(stream, "HTTP/1.1 200 OK\r\n");
     fprintf(stream, "Content-Type: text/html\r\n");
-    fprintf(stream, "Content-Length: 90\r\n");
+    fprintf(stream, "Content-Length: 512\r\n");
     fprintf(stream, "\r\n");
 
     char line[MAX_LINE];
