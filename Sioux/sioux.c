@@ -6,9 +6,7 @@
 
 #define MAX_SERVICE_NAME 32
 #define DEFAULT_PORT 8080
-
-#define MAX_LIGNE 16
-#define BUFFERSIZE 512
+#define MAX_LINE 512
 
 void analyzeArg(int argc, char* argv[], char service[]){
     
@@ -47,15 +45,18 @@ int clientGestion(int sockFd){
     }
     
     //Envoyer l'entête
-    fprintf(stream, "200\n");
-    fprintf(stream, "Content-Type: text/html\n");
-    fprintf(stream, "Content-Length: 90\n");
-    
-    char ligne[MAX_LIGNE];
-    while(fgets(ligne,MAX_LIGNE,html)!=NULL)
-    fprintf(stream,"%s",ligne);
+    fprintf(stream, "HTTP/1.1 200 OK\r\n");
+    fprintf(stream, "Content-Type: text/html\r\n");
+    fprintf(stream, "Content-Length: 90\r\n");
+    fprintf(stream, "\r\n");
+
+    char line[MAX_LINE];
+    while(fgets(line, MAX_LINE, html)!=NULL){
+        fprintf(stream, "%s",line);
+    }
     
     // Terminer la connexion 
+    printf("Envoie de la page web à l'utilisateur fin du stream\n");
     fclose(stream);
     return 0;
 }
