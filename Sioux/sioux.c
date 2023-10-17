@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "libreseau.h"
-#include "http.h"
+#include "analyste_http.h"
 #include <stdlib.h>
 #include <getopt.h>
 #include <string.h>
