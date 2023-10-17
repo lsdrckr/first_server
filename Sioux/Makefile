@@ -2,19 +2,16 @@ CFLAGS = -Wall -Wextra -Werror -I../libs/Reseau
 LDFLAGS = -L../libs/Reseau
 LIBS = -lreseau
 TARGET = sioux
-SRCS = $(TARGET).c
+SRCS = $(wildcard *.c)
+HEADERS = $(wildcard *.h)
 OBJS = $(SRCS:.c=.o)
 
 all: $(TARGET)
 
-$(TARGET): $(OBJS) http.o
+$(TARGET): $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
-http.o: http.h http.c
-	clang $(CFLAGS) -c http.c
-
-
-%.o: %.c
+%.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 .PHONY: clean
