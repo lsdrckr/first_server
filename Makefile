@@ -15,7 +15,7 @@ all:
 
 
 start:
-	cd ./Sioux/ && ./sioux
+	sudo cd ./Sioux/ && ./sioux
 
 .PHONY : clean 
 

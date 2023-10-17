@@ -7,8 +7,12 @@ OBJS = $(SRCS:.c=.o)
 
 all: $(TARGET)
 
-$(TARGET): $(OBJS)
+$(TARGET): $(OBJS) http.o
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
+
+http.o: http.h http.c
+	clang $(CFLAGS) -c http.c
+
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
