@@ -6,7 +6,6 @@
 #include <string.h>
 
 #define MAX_SERVICE_NAME 32
-#define MAX_LINE 512
 
 void analyzeArg(int argc, char* argv[], char service[]){
     
@@ -27,6 +26,24 @@ void analyzeArg(int argc, char* argv[], char service[]){
     }
 }
 
+int clientHandler(int sockFd){
+
+    printf("Un nouveau client !\n");
+
+    // Obtenir la strcuture de fichier
+    FILE *stream = fdopen(sockFd, "a+");
+    if(stream==NULL){
+        perror("clientGestion.fdopen");
+        exit(EXIT_FAILURE);
+    }
+
+    requestHandler(stream);
+
+    // Terminer la connexion
+    fclose(stream);
+    return 0;
+}
+
 int main(int argc, char* argv[]){
 
     int sockFd;
@@ -42,7 +59,7 @@ int main(int argc, char* argv[]){
     printf("Serveur initialisé sur le port %s\n", service);
 
     printf("Serveur à l'écoute ...\n");
-    serverLoop(sockFd, clientGestion);
+    serverLoop(sockFd, clientHandler);
 
 
     return 0;

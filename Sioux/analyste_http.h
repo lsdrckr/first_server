@@ -3,8 +3,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#define MAX_LINE 512
 
-int clientGestion(int sockFd);
+void sendHtml(FILE *stream, char* htmlPath);
+void requestHandler(FILE* stream);
 
 #endif
