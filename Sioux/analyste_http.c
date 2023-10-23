@@ -1,11 +1,10 @@
 #include "analyste_http.h"
 
-void sendHtml(FILE *stream, char* htmlPath){
+int sendHtml(FILE *stream, char* htmlPath){
     // Obtenir le ficher html
     FILE *htmlFile = fopen(htmlPath, "r");
     if(htmlFile == NULL){
-        perror("Ouverture du fichier html");
-        exit(EXIT_FAILURE);
+        return -1;
     }
 
     //Obtenir la taille du fichier
@@ -26,71 +25,134 @@ void sendHtml(FILE *stream, char* htmlPath){
         fputc(c, stream);
     }
 
-    printf("Html send success !\n");
-
     //Fermeture de l'html
     fclose(htmlFile);
+    return 0;
 }
 
-int isForm(char* line){
+// Remplace l'ensemble des char toremove par les char toPlace renvoie 1 si au moins un remplacement 0 sinon
+int subCharInString(char* line, char toRemove, char toPlace){
+    int flag = 0;
     int i=0;
     while (line[i] != '\0'){
-        if (line[i] == '?'){
-            line[i] = ' ';
-            return 1;
+        if (line[i] == toRemove){
+            line[i] = toPlace;
+            flag = 1;
         }
         i++;
     }
+    return flag;
+}
+
+void getMethod(char* request, char* method){
+    sscanf(request,"%s", method);
+}
+
+void getPath(char* request, char* csvPath, char* extension){
+    char surplus[MAX_LINE];
+    char tmp[MAX_LINE];
+
+    sscanf(request, "%s %s",surplus, tmp);
+    subCharInString(tmp, '.', ' ');
+    sscanf(tmp,"%s",tmp);
+
+    strcpy(csvPath, "../");
+    strcat(csvPath, extension);
+    strcat(csvPath, tmp);
+    strcat(csvPath, ".");
+    strcat(csvPath, extension);
+}
+
+int getArg(char* request, char* arg){
+    char surplus[MAX_LINE];
+    char tmp[MAX_LINE];
+
+    sscanf(request, "%s %s", surplus, tmp);
+
+    if(subCharInString(tmp, '?', ' ') == 0){
+        return 0;
+    }
+
+    sscanf(tmp, "%s %s", surplus, arg);
+    subCharInString(arg,'=', ';');
+    subCharInString(arg, '&', ';');
+    return 1;
+}
+
+int appendToCsv(char* csvPath, char* arg){
+
+    int csvFile;
+
+    // Ouverture ou création du fichier csv
+    csvFile = open(csvPath, O_CREAT|O_WRONLY|O_APPEND, S_IROTH|S_IWOTH);
+    if(csvFile < 0){
+        return -1;
+    }
+
+    // Ecriture des arguments dans le csv
+    strcat(arg,"\n");
+    write(csvFile, arg, strlen(arg));
+
+    // Fermeture du fichier csv
+    close(csvFile);
     return 0;
 }
 
 void requestHandler(FILE *stream){
     
-    char line[MAX_LINE];
-    fgets(line,MAX_LINE,stream);
-    
+    char request[MAX_LINE];
     char method[MAX_LINE];
-    char urlAndArg[MAX_LINE];
-    char version[MAX_LINE];
-    char url[MAX_LINE];
-    char arg[MAX_LINE];
+    char htmlPath[MAX_LINE];
     char csvPath[MAX_LINE];
-    sscanf(line, "%s %s %s", method, urlAndArg, version);
-    
+    char arg[MAX_LINE];
+
+    // Récupération de la requète et analyse de la requète
+    fgets(request,MAX_LINE,stream);
+    getMethod(request, method);
+
     if(strcmp(method,"GET") == 0){
-        printf("Gestion de la requète GET :\n");
-        
-        if(isForm(urlAndArg)){
-            sscanf(urlAndArg, "%s %s", url, arg);
-            strcpy(csvPath, url);
-            char csvPath[MAX_LINE];
-            int i=0;
-                while (csvPath[i] != '\0'){
-                    if (csvPath[i] == '.'){
-                    csvPath[i] = ' ';
-                    }
-                    i++;
-                }
-            sscanf(csvPath, "%s", csvPath);
-            strcat(csvPath, ".csv");
-            printf("%s\n", csvPath);
+
+        printf("\tGestion de la requète GET : %s", request);
+
+        if(getArg(request, arg)){
+
+            printf("\tPage Reponse\n");
+
+            // Récupération du chemin csv
+            getPath(request, csvPath, "csv");
+
+            // ajout dans le csv
+            if(appendToCsv(csvPath, arg) < 0){
+
+                printf("\tImpossible d'ouvrir le fichier csv\n");
+
+            }else{
+
+                printf("\tReponse enregistrer dans %s\n", csvPath);
+
+            }
         }else{
-            sscanf(urlAndArg, "%s", url);
+
+            printf("\tPage vote\n");
+
         }
-        char htmlPath[MAX_LINE] = "../html";
-        strcat(htmlPath, url);
-        sendHtml(stream, htmlPath);
+
+        // Récupération du chemin html
+        getPath(request, htmlPath, "html");
+
+        // Envoie de l'html
+        if(sendHtml(stream, htmlPath) < 0){
+
+            printf("\tImpossible d'ouvrir le fichier html\n");
+
+        }else{
+
+            printf("\t%s bien envoyé\n", htmlPath);
+
+        }
+    }else{
+
+        printf("Méthode non reconnue pour la requète %s\n", request);
+
     }
-    
-    
-//     if(strcmp(token,"GET") == 0){
-//         token = strtok(NULL, " ");
-//         token = strtok(token, "?");
-//         char htmlFile[MAX_LINE] = "../html";
-//         strcat(htmlFile, token);
-//         
-//         sendHtml(stream, htmlFile);
-//     }else{
-//         
-//     }
 }

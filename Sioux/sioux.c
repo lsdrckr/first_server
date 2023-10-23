@@ -28,7 +28,7 @@ void analyzeArg(int argc, char* argv[], char service[]){
 
 int clientHandler(int sockFd){
 
-    printf("Un nouveau client !\n");
+    printf("Nouvelle connexion :\n");
 
     // Obtenir la strcuture de fichier
     FILE *stream = fdopen(sockFd, "a+");
@@ -59,6 +59,7 @@ int main(int argc, char* argv[]){
     printf("Serveur initialisé sur le port %s\n", service);
 
     printf("Serveur à l'écoute ...\n");
+    printf("\n\n");
     serverLoop(sockFd, clientHandler);
 
 
