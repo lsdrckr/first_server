@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#define MAX_LINE 512
 
 void sendHtml(FILE *stream, char* htmlPath);
 void requestHandler(FILE* stream);
