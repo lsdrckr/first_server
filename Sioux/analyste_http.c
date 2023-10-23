@@ -48,12 +48,12 @@ void getMethod(char* request, char* method){
     sscanf(request,"%s", method);
 }
 
-void getPath(char* request, char* csvPath, char* extension){
+int getPath(char* request, char* csvPath, char* extension){
     char surplus[MAX_LINE];
     char tmp[MAX_LINE];
 
     sscanf(request, "%s %s",surplus, tmp);
-    subCharInString(tmp, '.', ' ');
+    if(subCharInString(tmp, '.', ' ') == 0) return 0;
     sscanf(tmp,"%s",tmp);
 
     strcpy(csvPath, "../");
@@ -61,6 +61,7 @@ void getPath(char* request, char* csvPath, char* extension){
     strcat(csvPath, tmp);
     strcat(csvPath, ".");
     strcat(csvPath, extension);
+    return 1;
 }
 
 int getArg(char* request, char* arg){
@@ -138,12 +139,14 @@ void requestHandler(FILE *stream){
         }
 
         // Récupération du chemin html
-        getPath(request, htmlPath, "html");
+        if(getPath(request, htmlPath, "html") == 0){
+            strcpy(htmlPath, "../html/vote.html");
+        }
 
         // Envoie de l'html
         if(sendHtml(stream, htmlPath) < 0){
 
-            printf("\tImpossible d'ouvrir le fichier html\n");
+            printf("\tImpossible d'ouvrir le fichier %s\n", htmlPath);
 
         }else{
 
