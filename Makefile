@@ -12,6 +12,7 @@ all:
         echo "Building in $$dir..."; \
         $(MAKE) -C $$dir; \
 	done
+	mkdir csv
 
 
 start:
@@ -23,4 +24,5 @@ clean:
 	for dir in $(DIRS); do \
 		$(MAKE) -C $$dir -f Makefile $@; \
 	done
+	rm -rf csv
 
