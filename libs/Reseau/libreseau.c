@@ -1,11 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <netdb.h>
-#include <string.h>
 #include "libreseau.h"
 
 void error(const char * msg){
@@ -65,17 +57,36 @@ int serverInit(char *service, int connections){
     return sockFd;
 }
 
+void* pthread(void* arg){
+    
+    // Récupération des infos pour le thread
+    int streamFd = ((arg_t *)arg)->fd1;
+    int sockFd = ((arg_t *)arg)->fd2;
+    int (*traitement)(int) = ((arg_t *)arg)->fonction;
+    
+    // Passage de la socket de dialogue à la fonction de traitement
+    if(traitement(streamFd) < 0){
+        shutdown(sockFd, SHUT_RDWR);
+    }
+    
+    // Fermeture du thread
+    pthread_exit(NULL);
+}
+
 int serverLoop(int sockFd, int (*traitement)(int)){
+    
+    pthread_t tid;
     int streamFd;
     while(1){
         // Attente d'une connexion
         streamFd = accept(sockFd, NULL, NULL);
         if(streamFd < 0) return -1;
-
-        // Passage de la socket de dialogue à la fonction de traitement
-        if(traitement(streamFd)<0){
-            shutdown(sockFd,SHUT_RDWR);
-            return 0;
-        }
+        
+        // Création d'un thread pour gérer le nouveau client
+        arg_t *arg = (arg_t *) malloc(sizeof(arg_t *));
+        arg->fonction = traitement;
+        arg->fd1 = streamFd;
+        arg->fd2 = sockFd;
+        pthread_create(&tid, NULL, pthread, (void*)arg);
     }
 }

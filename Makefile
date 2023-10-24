@@ -12,7 +12,6 @@ all:
         echo "Building in $$dir..."; \
         $(MAKE) -C $$dir; \
 	done
-	mkdir csv
 
 
 start:

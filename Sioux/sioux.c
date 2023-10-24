@@ -29,7 +29,6 @@ void analyzeArg(int argc, char* argv[], char service[]){
 int clientHandler(int sockFd){
 
     printf("Nouvelle connexion :\n");
-
     // Obtenir la strcuture de fichier
     FILE *stream = fdopen(sockFd, "a+");
     if(stream==NULL){

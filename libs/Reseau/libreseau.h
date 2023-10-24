@@ -9,6 +9,13 @@
 #include <netinet/tcp.h>
 #include <netdb.h>
 #include <string.h>
+#include <pthread.h>
+
+typedef struct{
+    int (*fonction)(int);
+    int fd1;
+    int fd2;
+}arg_t;
 
 int serverInit(char *service, int connections);
 /* Initialise le server sur le port du service et avec le nombre de connections spécifiées
