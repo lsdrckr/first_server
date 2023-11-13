@@ -61,6 +61,5 @@ int main(int argc, char* argv[]){
     printf("\n\n");
     serverLoop(sockFd, clientHandler);
 
-
     return 0;
 }

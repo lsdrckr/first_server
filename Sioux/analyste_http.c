@@ -87,7 +87,7 @@ int appendToCsv(char* csvPath, char* arg){
     // Ouverture ou création du fichier csv
     mkdir("../csv", S_IRWXU | S_IRGRP | S_IROTH | S_IXGRP | S_IXOTH);
     csvFile = open(csvPath, O_CREAT|O_WRONLY|O_APPEND, S_IROTH|S_IWOTH);
-    chmod(csvPath, 0777);
+    chmod(csvPath, 0666);
     if(csvFile < 0){
         return -1;
     }

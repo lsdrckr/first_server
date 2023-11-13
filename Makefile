@@ -5,7 +5,7 @@ export CLIB = ar cq
 export CFLAGS = -Wall
 export CDEBUG = -g -DDEBUG
 
-DIRS = Ablette libs/Reseau Sioux
+DIRS = libs/Reseau Sioux
 
 all:
 	@for dir in $(DIRS); do \
