@@ -29,5 +29,10 @@ sockFd : descripteur du socket
 traitement : nom de la fonction de traitement
 */
 
+int clientConnect(char *service, int (*traitement)(int));
+/* Connecte un client au service spécifié
+sockFd : descripteur du socket
+traitement : nom de la fonction de traitement
+*/
 
 #endif

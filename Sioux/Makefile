@@ -1,4 +1,4 @@
-CFLAGS = -Wall -Wextra -Werror -I../libs/Reseau
+CFLAGS = -Wall -Wextra -Werror -I../libs/Reseau -g
 LDFLAGS = -L../libs/Reseau
 LIBS = -lreseau
 TARGET = sioux

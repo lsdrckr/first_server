@@ -4,8 +4,7 @@ void error(const char * msg){
     perror(msg);
     exit(EXIT_FAILURE);
 }
-
-
+    
 int serverInit(char *service, int connections){
 
     struct addrinfo precisions, *result, *origine;
@@ -63,6 +62,7 @@ void* pthread(void* arg){
     int streamFd = ((arg_t *)arg)->fd1;
     int sockFd = ((arg_t *)arg)->fd2;
     int (*traitement)(int) = ((arg_t *)arg)->fonction;
+    free(arg);
     
     // Passage de la socket de dialogue à la fonction de traitement
     if(traitement(streamFd) < 0){
@@ -90,3 +90,5 @@ int serverLoop(int sockFd, int (*traitement)(int)){
         pthread_create(&tid, NULL, pthread, (void*)arg);
     }
 }
+
+

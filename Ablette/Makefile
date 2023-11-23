@@ -1,6 +1,6 @@
-CFLAGS = -Wall -Wextra -Werror -I../libs/Reseau
+CFLAGS = -Wall -Wextra -I../libs/Reseau
 LDFLAGS = -L../libs/Reseau
-LIBS = -lreseau
+LIBS = -lreseau -lpcap
 TARGET = ablette
 SRCS = $(wildcard *.c)
 HEADERS = $(wildcard *.h)
