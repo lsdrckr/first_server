@@ -66,27 +66,27 @@ int main(int argc, char* argv[]){
     strcpy(ports[0], "80");
     strcpy(ports[1], "443");
     
-    pcap_t *handle = pcap_open_live(dev, BUFSIZ, 1, 1000, errbuf);
-    if (handle == NULL) { printf("Impossible d'ouvir l'interface %s : %s\n", dev, errbuf); perror("interface.open"); return -1;}
+    // pcap_t *handle = pcap_open_live(dev, BUFSIZ, 1, 1000, errbuf);
+    // if (handle == NULL) { printf("Impossible d'ouvir l'interface %s : %s\n", dev, errbuf); perror("interface.open"); return -1;}
     
-    //Lancement de la capture
-    // pcap_loop(handle, 0, (void *)packetHandler, NULL);
+    // //Lancement de la capture
+    // // pcap_loop(handle, 0, (void *)packetHandler, NULL);
     
-    packet = pcap_next(handle, &header);
+    // packet = pcap_next(handle, &header);
     
-     /* Décoder l'en-tête Ethernet en convertissant le packet en une
-    struct */
-    struct sniff_ethernet* ethernet = (struct sniff_ethernet *) (packet);
-    /* Si c'est de l'IPv4 */
-    if (ntohs(ethernet->ether_type) == IPv4_ETHERTYPE) {
-          /* Décoder IPv4 : convertir le paquet en une struct. Ne pas
-    oublier de décaler de SIZE_ETHERNET octets */
-    ip = (struct sniff_ip *) (packet + SIZE_ETHERNET);
-    /* Afficher */
-    printf ("Paquet IPv4 avec le protocole %d\n", ip->ip_p);
+    //  /* Décoder l'en-tête Ethernet en convertissant le packet en une
+    // struct */
+    // struct sniff_ethernet* ethernet = (struct sniff_ethernet *) (packet);
+    // /* Si c'est de l'IPv4 */
+    // if (ntohs(ethernet->ether_type) == IPv4_ETHERTYPE) {
+    //       /* Décoder IPv4 : convertir le paquet en une struct. Ne pas
+    // oublier de décaler de SIZE_ETHERNET octets */
+    // ip = (struct sniff_ip *) (packet + SIZE_ETHERNET);
+    // /* Afficher */
+    // printf ("Paquet IPv4 avec le protocole %d\n", ip->ip_p);
     
-    //Fermeture de la capture
-    pcap_close(handle);
+    // //Fermeture de la capture
+    // pcap_close(handle);
     
     analyzeArg(argc, argv, ports, &nbPorts);
     

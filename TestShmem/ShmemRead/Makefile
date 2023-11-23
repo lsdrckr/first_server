@@ -1,7 +1,7 @@
-CFLAGS = -Wall -Wextra
-LDFLAGS = 
-LIBS = -lpcap
-TARGET = ablette
+CFLAGS = -Wall -Wextra -I../../libs/Shmem
+LDFLAGS = -L../../libs/Shmem
+LIBS = -lshmem
+TARGET = shmemRead
 SRCS = $(wildcard *.c)
 HEADERS = $(wildcard *.h)
 OBJS = $(SRCS:.c=.o)
