@@ -4,25 +4,24 @@
 #include <string.h>
 #include <pcap.h>
 #include <netinet/ip.h>
-
+#include <arpa/inet.h>
+#include <unistd.h>
 
 #define MAX_SERVICE_NAME 32
 #define MAX_PORTS 32
 #define MAX_FILTER_EXP 1024
-#define MAX_ADDR_SAVE 5
-#define MAX_ADDR 2048
+#define MAX_ADDR_SAV 2048
+#define NB_TOP_ADDR 5
 
-struct addr_ip_t{
-    char *addr[MAX_ADDR];
-    int nb_mess[MAX_ADDR];
-    int nb_addr;
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+struct nbRequest_t {
+    uint32_t address[MAX_ADDR_SAV];
+    unsigned int requestCount[MAX_ADDR_SAV]; 
+    int lastIndex;
 };
 
-struct addr_ip_t addr_ip;
-                            
-
-int i=0;
-char top_addr[MAX_ADDR_SAVE][2] = {0}; 
+struct nbRequest_t nbRequest;
 
 int getPortArray(char portsArg[], char ports[MAX_PORTS][MAX_SERVICE_NAME]){
     int j = 0;
@@ -38,8 +37,7 @@ int getPortArray(char portsArg[], char ports[MAX_PORTS][MAX_SERVICE_NAME]){
         }
     }
     return j;
-}
-        
+}   
 
 void analyzeArg(int argc, char* argv[], char ports[MAX_PORTS][MAX_SERVICE_NAME], int* nbPorts){
 
@@ -64,76 +62,77 @@ void analyzeArg(int argc, char* argv[], char ports[MAX_PORTS][MAX_SERVICE_NAME],
     }
 }
 
-int add_addr(char *addr_ip_src){
-    // for (int i=0; i<addr_ip.nb_addr; i++){
-    //     printf("addr_ip.addr[i] : %s addr_ip_src %s %d\n", addr_ip.addr[i], addr_ip_src, i);
-    //     if (strcmp(addr_ip.addr[i],addr_ip_src) == 0){
-    //         addr_ip.nb_mess[i]++;
-    //         return 0;
-    //     }
-    // }
-        
-    if (addr_ip.nb_addr < MAX_ADDR){
-        addr_ip.addr[addr_ip.nb_addr] = addr_ip_src; // Attention nb_addr vaut null
-        addr_ip.nb_mess[addr_ip.nb_addr] = 1;
-        addr_ip.nb_addr++;
-        printf("test %d\n", addr_ip.nb_addr);
-        return 0;
-    }
-    else{
-        printf("Dépassement de la taille max de sauvegarde d'adresse");
-        return -1;
-    }
+uint32_t extractSourceAddress(char *packet) {
+    // Cast du paquet au type de structure iphdr
+    struct iphdr *ipHeader = (struct iphdr *)packet;
+
+    // Conversion de l'adresse source à l'ordre d'octets de l'hôte
+    uint32_t sourceAddress = ntohl(ipHeader->saddr);
+
+    return sourceAddress;
 }
 
-void send_top_addr(){
-    int max[5] = {0};
-    char *addr[5];
-    
-    for(int i=0; i<5; i++){
-        addr[i] = "";
-    }
-    
-    for(int i=0; i<5; i++){
-        for(int j=0; j<addr_ip.nb_addr; j++){
-            for(int k=0; k<5; k++){
-                if(strcmp(addr[k], addr_ip.addr[j]) == 0){
-                    break;
-                }
-                if(addr_ip.nb_mess[j] > max[i]){
-                    max[i] = addr_ip.nb_mess[j];
-                    addr[i] = addr_ip.addr[j];
-                }
-            }
+void addAddress(uint32_t address){
+    nbRequest.address[nbRequest.lastIndex] = address;
+    nbRequest.requestCount[nbRequest.lastIndex] = 1;
+    nbRequest.lastIndex++;
+}
+
+void newAddress(uint32_t address){
+    for(int i=0; i<nbRequest.lastIndex; i++){
+        if(nbRequest.address[i] == address){
+            nbRequest.requestCount[i]++;
+            return;
         }
     }
+    addAddress(address);
 }
 
+int isInTop(uint32_t t[], uint32_t x, int len){
+    for(int i=0; i<len; i++){
+        if(t[i] == x) return 1;
+    }
+    return 0;
+}
 
-void packet_handler(u_char *user, const struct pcap_pkthdr *pkthdr, const u_char *packet){
+void sendTop(){
+
+    unsigned int maxRequest = 0;
+    uint32_t topAddress[NB_TOP_ADDR] = {0};
+    unsigned int topCount[NB_TOP_ADDR] = {0};
+
+    // for(int i=0; i<NB_TOP_ADDR; i++){
+    //     topAddress[i] = 0;
+    // }
+
+    for(int rank=0; rank<NB_TOP_ADDR; rank++){
+        for(int i=0; i<nbRequest.lastIndex; i++){
+            if(!isInTop(topAddress, nbRequest.address[i], rank) && nbRequest.requestCount[i] > maxRequest){
+                topAddress[rank] = nbRequest.address[i];
+                topCount[rank] = nbRequest.requestCount[i];
+                maxRequest = nbRequest.requestCount[i];
+            }
+        }
+        maxRequest = 0;
+    }
+
+    printf("Stat : \n");
+    for(int i=0; i<NB_TOP_ADDR; i++){ 
+        printf("%d: %u.%u.%u.%u nb = %d\n", i+1, ((topAddress[i] >> 24) & 0xFF), ((topAddress[i] >> 16) & 0xFF), ((topAddress[i] >> 8) & 0xFF), (topAddress[i] & 0xFF), topCount[i]);
+    }
+}
+
+void packet_handler(u_char *user, const struct pcap_pkthdr *pkthdr, const u_char *packet) {
     //Fonction de traitement du paquet
     printf("Nouveau paquet capturé !\n");
-    // printf("Contenue du paquet capturé en hexadécimal : \n");
-    // for (bpf_u_int32 i = 0; i<pkthdr->caplen; ++i){
-    //     printf("%02x ", packet[i]);
-    //     if ((i+1)%16 == 0 || i == pkthdr->caplen - 1){
-    //         printf("\n\n");
-    //     }
-    // }
     
-    struct ip *ip_header = (struct ip*) (packet+14);
-    
-    char addr_ip_src[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &(ip_header->ip_dst), addr_ip_src, INET_ADDRSTRLEN);
-    printf("addresse ip source : %s\n", addr_ip_src);
-    
-    add_addr(addr_ip_src);
-    printf("1: %s nb : %d\n", addr_ip.addr[0], addr_ip.nb_mess[0]);
-    printf("2: %s nb : %d\n", addr_ip.addr[1], addr_ip.nb_mess[1]);
-    printf("3: %s nb : %d\n", addr_ip.addr[2], addr_ip.nb_mess[2]);
-    printf("4: %s nb : %d\n", addr_ip.addr[3], addr_ip.nb_mess[3]);
-}
+    char *ipPacket = (char *)(packet+14);
 
+    uint32_t addrIpSrc = extractSourceAddress(ipPacket);
+
+    newAddress(addrIpSrc);
+    sendTop();
+}
 
 int main(int argc, char* argv[]){
     
@@ -141,34 +140,42 @@ int main(int argc, char* argv[]){
     int nbPorts = 2;
     char *device = argv[1];
     pcap_t *handle;
-    char error_buffer[PCAP_ERRBUF_SIZE];
+    char errbuf[PCAP_ERRBUF_SIZE];
     struct bpf_program filter;
-    char filter_exp[MAX_FILTER_EXP] = "port ";
-    
+    char filter_exp[MAX_FILTER_EXP];
+    char local_ip[INET_ADDRSTRLEN];
+
     // Initialisation des sauvegardes d'adresse
-    for(int i=0; i<MAX_ADDR; i++){
-        addr_ip.addr[i] = "";
+    for(int i=0; i<MAX_ADDR_SAV; i++){
+        nbRequest.address[i] = 0;
+        nbRequest.requestCount[i] = 0;
     }
-    addr_ip.nb_addr = 0;
-    
+    nbRequest.lastIndex = 0;
+
+    // Obtenir l'adresse ip local
+    printf("Entrez votre adresse ip locale format x.x.x.x\n");
+    scanf("%s", local_ip);
+
     // Gestion du filtre avec les arguments
+
+    snprintf(filter_exp, sizeof(filter_exp), "dst host %s and (port ", local_ip);
     strcpy(ports[0], "80");
     strcpy(ports[1], "443");
     analyzeArg(argc, argv, ports, &nbPorts);
     strcat(filter_exp, ports[0]);
     for(int i=1; i<nbPorts; i++){
-        strcat(filter_exp, " or port ");
+        strcat(filter_exp, " or dst port ");
         strcat(filter_exp, ports[i]);
     }
-    
+    strcat(filter_exp, ")");
     // Debug info
     printf("Lecture des paquets sur l'interface %s\n", device);
     printf("avec le filtre_exp : %s\n", filter_exp);
     
-    handle = pcap_open_live(device, BUFSIZ, 1, 1000, error_buffer);
+    handle = pcap_open_live(device, BUFSIZ, 1, 1000, errbuf);
     
     if (handle == NULL){
-        printf("Impossible d'ouvrir %s - %s\n", device, error_buffer);
+        printf("Impossible d'ouvrir %s - %s\n", device, errbuf);
         return 2;
     }
     
