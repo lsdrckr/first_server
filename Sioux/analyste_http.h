@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #define MAX_LINE 512
+#define MAX_STATS_SIZE 512
 
 void requestHandler(FILE* stream);
 

@@ -1,6 +1,6 @@
-CFLAGS = -Wall -Wextra -Werror -I../libs/Reseau -g
-LDFLAGS = -L../libs/Reseau
-LIBS = -lreseau
+CFLAGS = -Wall -Wextra -Werror -I../libs/Reseau -I../libs/Shmem -g
+LDFLAGS = -L../libs/Reseau -L../libs/Shmem
+LIBS = -lreseau -lshmem
 TARGET = sioux
 SRCS = $(wildcard *.c)
 HEADERS = $(wildcard *.h)

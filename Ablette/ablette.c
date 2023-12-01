@@ -6,12 +6,14 @@
 #include <netinet/ip.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include "libshmem.h"
 
 #define MAX_SERVICE_NAME 32
 #define MAX_PORTS 32
 #define MAX_FILTER_EXP 1024
 #define MAX_ADDR_SAV 2048
 #define NB_TOP_ADDR 5
+#define ADDR_STRING_SIZE 16
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
@@ -97,14 +99,19 @@ int isInTop(uint32_t t[], uint32_t x, int len){
 
 void sendTop(){
 
+    // Initialisation de la mémoire partagée
+    void *sh_address = attach_memory_block("ablette.c", 4096);
+    
+    if (sh_address == NULL){
+        printf("ERROR: couldn't get memory block\n");
+        exit(EXIT_FAILURE);
+    }
+
     unsigned int maxRequest = 0;
     uint32_t topAddress[NB_TOP_ADDR] = {0};
     unsigned int topCount[NB_TOP_ADDR] = {0};
-
-    // for(int i=0; i<NB_TOP_ADDR; i++){
-    //     topAddress[i] = 0;
-    // }
-
+    char topAddressString[NB_TOP_ADDR][ADDR_STRING_SIZE];
+    
     for(int rank=0; rank<NB_TOP_ADDR; rank++){
         for(int i=0; i<nbRequest.lastIndex; i++){
             if(!isInTop(topAddress, nbRequest.address[i], rank) && nbRequest.requestCount[i] > maxRequest){
@@ -116,10 +123,17 @@ void sendTop(){
         maxRequest = 0;
     }
 
-    printf("Stat : \n");
+    printf("Stats : \n");
     for(int i=0; i<NB_TOP_ADDR; i++){ 
-        printf("%d: %u.%u.%u.%u nb = %d\n", i+1, ((topAddress[i] >> 24) & 0xFF), ((topAddress[i] >> 16) & 0xFF), ((topAddress[i] >> 8) & 0xFF), (topAddress[i] & 0xFF), topCount[i]);
+        snprintf(topAddressString[i], ADDR_STRING_SIZE,"%u.%u.%u.%u", ((topAddress[i] >> 24) & 0xFF), ((topAddress[i] >> 16) & 0xFF), ((topAddress[i] >> 8) & 0xFF), (topAddress[i] & 0xFF));
+        printf("%d: %s nb = %d\n", i+1, topAddressString[i], topCount[i]);
     }
+
+    // Enregistrer dans la mémoire partagée
+    memcpy(sh_address, topAddressString, sizeof(topAddressString));
+    
+    // Détacher les blocks mémoires
+    detach_memory_block(sh_address);
 }
 
 void packet_handler(u_char *user, const struct pcap_pkthdr *pkthdr, const u_char *packet) {

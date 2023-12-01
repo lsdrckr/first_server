@@ -4,8 +4,23 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <string.h>
+#include <signal.h>
+#include "libshmem.h"
 
+
+#define SHMEM_NAME "../Ablette/ablette.c"
 #define MAX_SERVICE_NAME 32
+
+void sig_handler() {
+    printf("Stoping process ...\n");
+    if (destroy_memory_block(SHMEM_NAME))
+    {
+        printf("Destroyed block : %s\n", SHMEM_NAME);
+    }else{
+        printf("Could not destroy block : %s\n", SHMEM_NAME);
+    }
+    exit(EXIT_SUCCESS);
+}
 
 void analyzeArg(int argc, char* argv[], char service[]){
     
@@ -28,7 +43,7 @@ void analyzeArg(int argc, char* argv[], char service[]){
 
 int clientHandler(int sockFd){
 
-    printf("Nouvelle connexion :\n");
+    printf("Nouvelle connexion:\n");
     // Obtenir la strcuture de fichier
     FILE *stream = fdopen(sockFd, "a+");
     if(stream==NULL){
@@ -48,6 +63,16 @@ int main(int argc, char* argv[]){
     int sockFd;
     char service[MAX_SERVICE_NAME] = "80";
     
+    // Initialisation des interruptions 
+    if (signal(SIGINT, sig_handler) == SIG_ERR) {
+        perror("Erreur lors de la configuration du gestionnaire pour SIGINT");
+        exit(EXIT_FAILURE);
+    }
+    if (signal(SIGTSTP, sig_handler) == SIG_ERR) {
+        perror("Erreur lors de la configuration du gestionnaire pour SIGSTOP");
+        exit(EXIT_FAILURE);
+    }
+
     analyzeArg(argc, argv, service);
     
     sockFd = serverInit(service, 3);

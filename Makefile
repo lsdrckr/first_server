@@ -5,7 +5,7 @@ export CLIB = ar cq
 export CFLAGS = -Wall
 export CDEBUG = -g -DDEBUG
 
-DIRS = Ablette libs/Reseau libs/Shmem Sioux TestShmem/ShmemRead TestShmem/ShmemWrite 
+DIRS = libs/Reseau libs/Shmem Ablette Sioux TestShmem/ShmemRead TestShmem/ShmemWrite 
 
 all:
 	@for dir in $(DIRS); do \

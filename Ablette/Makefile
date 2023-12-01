@@ -1,6 +1,6 @@
-CFLAGS = -Wall -Wextra -Werror
-LDFLAGS = 
-LIBS = -lpcap
+CFLAGS = -Wall -Wextra -Werror -I../libs/Shmem
+LDFLAGS = -L ../libs/Shmem
+LIBS = -lpcap -lshmem
 TARGET = ablette
 SRCS = $(wildcard *.c)
 HEADERS = $(wildcard *.h)
