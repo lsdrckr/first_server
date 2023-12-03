@@ -18,7 +18,7 @@ De la même manière, depuis le répertoire principal, entrez dans Ablette ```cd
 
 ## Fonctionnement
 
-Sur une page Firefox de votre machine, recherchez X.X.X.X:P où X.X.X.X est votre adresse IP et P le port que vous avez attribué à Sioux. Vous arriverez sur notre page vote.html . En réalisant un premier vote, le repertoire csv se crée, contenant le fichier vote-réponse.html dans lequel vous trouverez les infos entrées précédemment.
+Sur une page Firefox de votre machine, recherchez X.X.X.X:P où X.X.X.X est votre adresse IP et P le port que vous avez attribué à Sioux. Vous arriverez sur notre page vote.html . En réalisant un premier vote, le repertoire csv se crée, contenant le fichier dans lequel vous trouverez les infos entrées précédemment.
 
 ## Statistiques
 
@@ -26,4 +26,4 @@ Pour trouver les statistiques trouvées par Ablette, recherchez X.X.X.X:P/stats 
 
 ## Nettoyage
 
-Un simple ```make clean``` dans le répertoire principal supprimera tout les exécutables ainsi que le répertoire principal. 
+Un simple ```make clean``` dans le répertoire principal supprimera tout les exécutables ainsi que le répertoire CSV. 
