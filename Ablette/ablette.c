@@ -44,6 +44,7 @@ int getPortArray(char portsArg[], char ports[MAX_PORTS][MAX_SERVICE_NAME]){
 void analyzeArg(int argc, char* argv[], char ports[MAX_PORTS][MAX_SERVICE_NAME], int* nbPorts){
 
     int option;
+    char portsArg[MAX_PORTS*MAX_SERVICE_NAME+MAX_PORTS];
 
     static struct option long_options[] = {
         {"port", required_argument, NULL, 'p'}
@@ -51,7 +52,6 @@ void analyzeArg(int argc, char* argv[], char ports[MAX_PORTS][MAX_SERVICE_NAME],
     while((option = getopt_long(argc, argv, "p:", long_options, NULL)) != -1){
         switch(option) {
             case 'p':
-                char portsArg[MAX_PORTS*MAX_SERVICE_NAME+MAX_PORTS];
                 strcpy(portsArg, optarg);
                 portsArg[strlen(optarg)] = '\0';
                 *nbPorts = getPortArray(portsArg, ports);                
