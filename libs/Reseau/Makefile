@@ -24,6 +24,6 @@ clean:
 #
 
 $(CIBLE): $(OBJETS)
-	$(AR) rs $@ $? -lpthread
+	$(AR) rs $@ $?
 
 $(CIBLE:.a=).o: $(CIBLE:.a=).c $(CIBLE:.a=).h
